@@ -1,19 +1,23 @@
 package router
 
 import (
+	"campusCard/config"
 	"campusCard/controller"
+	"github.com/gin-contrib/sessions"
+	sessionsRedis "github.com/gin-contrib/sessions/redis"
+
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func Router() *gin.Engine {
 	r := gin.Default()
-
+	store, _ := sessionsRedis.NewStore(10, "tcp", config.RedisAddress, "", []byte("secret"))
+	r.Use(sessions.Sessions("mySession", store))
 	user := r.Group("/user")
 	{
-		user.POST("/login", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
+		user.POST("/register", controller.UserController{}.Register)
+		user.POST("/login", controller.UserController{}.Login)
 		user.GET("/cardinfo/:id", controller.UserController{}.GetCardInfo)
 		user.GET("/tradeinfo", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller trade")

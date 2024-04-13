@@ -1,6 +1,10 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"github.com/gin-gonic/gin"
+)
 
 type JsonStruct struct {
 	Code int         `json:"code"`
@@ -20,4 +24,10 @@ func ReturnSuccess(c *gin.Context, code int, msg interface{}, data interface{}) 
 func ReturnError(c *gin.Context, code int, msg interface{}) {
 	json := &JsonErrStruct{Code: code, Msg: msg}
 	c.JSON(200, json)
+}
+
+func EncryMd5(s string) string {
+	ctx := md5.New()
+	ctx.Write([]byte(s))
+	return hex.EncodeToString(ctx.Sum(nil))
 }
