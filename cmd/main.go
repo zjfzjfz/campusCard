@@ -13,7 +13,7 @@ func main() {
 	//sad
 	//asdasd/
 	//asdas
-	fmt.Println("Server running on port 8080")
+	fmt.Printf("Server running on port 8080")
 	err := r.Run(":8080")
 	if err != nil {
 		return
