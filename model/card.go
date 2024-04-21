@@ -1,8 +1,6 @@
 package model
 
 import (
-	"fmt"
-	_ "fmt"
 	"strconv"
 	_ "time"
 
@@ -49,7 +47,6 @@ func ChangeLimit(id string, limit string) (float32, error) {
 		return 0, errors.Wrap(err, "failed to convert limit to float32")
 	}
 	newLimit := float32(newLimit64)
-	fmt.Println(123)
 
 	result := dao.Db.Table("account_info").Where("id = ?", id).Update("Limit", newLimit)
 	if result.Error != nil {

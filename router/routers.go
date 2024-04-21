@@ -25,7 +25,7 @@ func Router() *gin.Engine {
 		user.GET("/debtinfo", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller debt")
 		})
-		user.GET("/limit/:id/:limit", controller.UserController{}.PutLimit)
+		user.POST("/limit/:id/:limit", controller.UserController{}.PutLimit)
 		user.POST("/bath", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller login")
 		})

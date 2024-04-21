@@ -11,15 +11,19 @@ type UserController struct {
 
 func (u UserController) GetCardInfo(c *gin.Context) {
 	id := c.Param("id")
-	card, _ := model.GetCard(id)
-	ReturnSuccess(c, 200, "success", card)
+//	go func() {
+		card, _ := model.GetCard(id)
+		ReturnSuccess(c, 200, "success", card)
+//	}()
 }
 
 func (u UserController) PutLimit(c *gin.Context) {
 	id := c.Param("id")
 	limit := c.Param("limit")
-	nowLimit, _ := model.ChangeLimit(id, limit)
-	ReturnSuccess(c, 200, "success", nowLimit)
+//	go func() {
+		nowLimit, _ := model.ChangeLimit(id, limit)
+		ReturnSuccess(c, 200, "success", nowLimit)
+//	}()
 }
 
 func (u UserController) Register(c *gin.Context) {
