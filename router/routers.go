@@ -19,9 +19,8 @@ func Router() *gin.Engine {
 		user.POST("/register", controller.UserController{}.Register)
 		user.POST("/login", controller.UserController{}.Login)
 		user.GET("/cardinfo/:id", controller.UserController{}.GetCardInfo)
-		user.GET("/tradeinfo", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller trade")
-		})
+		user.GET("/tradeinfo/:id", controller.UserController{}.GetTradeInfo)
+		user.POST("/trade/:id", controller.UserController{}.Trade)
 		user.GET("/debtinfo", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller debt")
 		})

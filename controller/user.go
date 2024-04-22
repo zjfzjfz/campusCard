@@ -11,19 +11,52 @@ type UserController struct {
 
 func (u UserController) GetCardInfo(c *gin.Context) {
 	id := c.Param("id")
-//	go func() {
-		card, _ := model.GetCard(id)
-		ReturnSuccess(c, 200, "success", card)
-//	}()
+	card, err := model.GetCard(id)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+	ReturnSuccess(c, 200, "success", card)
+}
+
+func (u UserController) GetTradeInfo(c *gin.Context) {
+	id := c.Param("id")
+	trades, err := model.GetTrade(id)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+	ReturnSuccess(c, 200, "success",trades)
+}
+
+func (u UserController) Trade(c *gin.Context) {
+	id := c.Param("id")
+	var transaction model.Transaction
+	if err := c.ShouldBindJSON(&transaction); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	err := model.InsertTransaction(id, transaction)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+	ReturnSuccess(c, 200, "success",nil)
 }
 
 func (u UserController) PutLimit(c *gin.Context) {
 	id := c.Param("id")
 	limit := c.Param("limit")
-//	go func() {
-		nowLimit, _ := model.ChangeLimit(id, limit)
+		nowLimit, err := model.ChangeLimit(id, limit)
+		if err != nil {
+            // 处理错误，例如记录日志或返回错误响应
+            ReturnError(c, 500, err)
+            return
+        }
 		ReturnSuccess(c, 200, "success", nowLimit)
-//	}()
 }
 
 func (u UserController) Register(c *gin.Context) {

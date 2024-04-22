@@ -4,8 +4,8 @@ import (
 	"campusCard/config"
 	//"gorm.io/driver/mysql"
 	//"gorm.io/gorm"
-	"github.com/jinzhu/gorm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 type StudentInfo struct {
@@ -24,7 +24,8 @@ type AccountInfo struct {
     Limit      float64
 }
 
-type TransactionRecords struct {
+type TransactionRecord struct {
+    TID        string `gorm:"primary_key"`
     ID         string
     TType      int
     TLocation  string
@@ -33,7 +34,7 @@ type TransactionRecords struct {
 }
 
 type DebtRepayment struct {
-    ID     string
+    ID     string `gorm:"primary_key"`
     BDebt  float64
     LDebt  float64
 }
@@ -46,7 +47,7 @@ func (AccountInfo) TableName() string {
     return "account_info" // 指定自定义表名
 }
 
-func (TransactionRecords) TableName() string {
+func (TransactionRecord) TableName() string {
     return "transaction_records" // 指定自定义表名
 }
 
@@ -66,5 +67,5 @@ func init() {
 	if err != nil {
         panic("连接数据库失败")
     }
-	Db.AutoMigrate(&StudentInfo{}, &AccountInfo{}, &TransactionRecords{}, &DebtRepayment{})
+	Db.AutoMigrate(&StudentInfo{}, &AccountInfo{}, &TransactionRecord{}, &DebtRepayment{})
 }
