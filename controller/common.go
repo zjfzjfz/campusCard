@@ -22,6 +22,11 @@ func ReturnSuccess(c *gin.Context, code int, msg interface{}, data interface{}) 
 	c.JSON(200, json)
 }
 func ReturnError(c *gin.Context, code int, msg interface{}) {
+	// 尝试将msg断言为error类型
+    if errMsg, ok := msg.(error); ok {
+        // 如果msg是error类型，获取其字符串表示
+        msg = errMsg.Error()
+    }
 	json := &JsonErrStruct{Code: code, Msg: msg}
 	c.JSON(200, json)
 }
