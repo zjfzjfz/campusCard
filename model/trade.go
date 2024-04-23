@@ -51,8 +51,8 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
         TAmount:    transaction.TAmount,
     }
 	// 插入数据到 "transaction_records" 表
-	dao.Db.Table("transaction_records")
-    result := dao.Db.Create(&record)
+	tx.Table("transaction_records")
+    result := tx.Create(&record)
     if result.Error != nil {
         tx.Rollback()
         return nil, result.Error
