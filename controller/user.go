@@ -38,13 +38,13 @@ func (u UserController) Trade(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	err := model.InsertTransaction(id, transaction)
+	newBalance, err := model.InsertTransaction(id, transaction)
 	if err != nil {
 		// 处理错误，例如记录日志或返回错误响应
 		ReturnError(c, 500, err)
 		return
 	}
-	ReturnSuccess(c, 200, "success",nil)
+	ReturnSuccess(c, 200, "success", newBalance)
 }
 
 func (u UserController) PutLimit(c *gin.Context) {

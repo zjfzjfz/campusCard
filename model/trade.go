@@ -25,8 +25,25 @@ func GetTrade(id string) ([]dao.TransactionRecord, error) {
 	return records, nil
 }
 
-func InsertTransaction(id string, transaction Transaction) (error) {
-	record := dao.TransactionRecord{
+func InsertTransaction(id string, transaction Transaction) (interface{}, error) {
+	// 开启一个事务
+    tx := dao.Db.Begin()
+
+    // 检索账户余额
+    var accountInfo dao.AccountInfo
+    if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
+        // 回滚事务并返回错误
+        tx.Rollback()
+        return nil, err
+    }
+
+    newBalance := accountInfo.Balance + transaction.TAmount;
+    if  newBalance < 0 {
+        tx.Rollback()
+        return nil, errors.New("余额不足")
+    }
+    
+    record := dao.TransactionRecord{
         ID:         id, // 使用传入的 id
         TType:      transaction.TType,
         TLocation:  transaction.TLocation,
@@ -37,7 +54,13 @@ func InsertTransaction(id string, transaction Transaction) (error) {
 	dao.Db.Table("transaction_records")
     result := dao.Db.Create(&record)
     if result.Error != nil {
-        return result.Error
+        tx.Rollback()
+        return nil, result.Error
     }
-	return  nil
+    if err := tx.Commit().Error; err != nil {
+        // 如果提交时发生错误，回滚事务并返回错误
+        tx.Rollback()
+        return nil, err
+    }
+	return  newBalance, nil
 }

@@ -13,7 +13,7 @@ type Card struct {
 	Name       string
 	Id         string
 	Status     int
-	Balance    float32
+	Balance    float64
 	Validation string
 }
 
@@ -31,12 +31,11 @@ func GetCard(id string) (Card, error) {
 	return card, nil
 }
 
-func ChangeLimit(id string, limit string) (float32, error) {
-	newLimit64, err := strconv.ParseFloat(limit, 32)
+func ChangeLimit(id string, limit string) (float64, error) {
+	newLimit, err := strconv.ParseFloat(limit, 32)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to convert limit to float32")
 	}
-	newLimit := float32(newLimit64)
 
 	result := dao.Db.Table("account_info").Where("id = ?", id).Update("Limit", newLimit)
 	if result.Error != nil {

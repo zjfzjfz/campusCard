@@ -1,0 +1,54 @@
+//建表
+CREATE TABLE student_info (
+    `id` VARCHAR(50) PRIMARY KEY,
+    `pwd` VARCHAR(50),
+    `name` VARCHAR(100),
+    `i_id` VARCHAR(50)
+);
+
+CREATE TABLE account_info (
+    `cid` VARCHAR(50) PRIMARY KEY,
+    `id` VARCHAR(50),
+    `status` INTEGER CHECK (status >= 0 AND status <= 4),
+    `balance` NUMERIC,
+    `validation` DATE,
+    `limit` NUMERIC,
+    FOREIGN KEY (id) REFERENCES student_info(id)
+);
+
+CREATE TABLE transaction_records (
+    `t_id` VARCHAR(50) PRIMARY KEY,
+    `id` VARCHAR(50),
+    FOREIGN KEY (id) REFERENCES student_info(id),
+    `t_type` INTEGER CHECK (t_type >= 0 AND t_type <= 2),
+    `t_location` VARCHAR(100),
+    `t_time` DATETIME,
+    `t_amount` NUMERIC
+);
+
+CREATE TABLE debt_repayment (
+    `id` VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (id) REFERENCES student_info(id),
+    `b_debt` NUMERIC,
+    `l_debt` NUMERIC
+);
+
+//触发器
+DELIMITER //
+CREATE TRIGGER update_balance_after_transaction
+AFTER INSERT ON transaction_records
+FOR EACH ROW
+BEGIN
+    DECLARE current_balance NUMERIC;
+    -- 获取当前id的balance
+    SELECT balance INTO current_balance
+    FROM account_info
+    WHERE id = NEW.id;
+
+    -- 更新balance
+    UPDATE account_info
+    SET balance = current_balance + NEW.t_amount
+    WHERE id = NEW.id;
+END;
+//
+DELIMITER ;
