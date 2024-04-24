@@ -18,13 +18,13 @@ func Router() *gin.Engine {
 	{
 		user.POST("/register", controller.UserController{}.Register)
 		user.POST("/login", controller.UserController{}.Login)
+		user.POST("/logout", controller.UserController{}.Logout)
 		user.GET("/cardinfo/:id", controller.UserController{}.GetCardInfo)
-		user.GET("/tradeinfo/:id", controller.UserController{}.GetTradeInfo)
+		user.GET("/tradeinfo", controller.UserController{}.GetTradeInfo)
 		user.POST("/trade/:id", controller.UserController{}.Trade)
-		user.GET("/debtinfo", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller debt")
-		})
+		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
 		user.POST("/limit/:id/:limit", controller.UserController{}.PutLimit)
+
 		user.POST("/bath", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller login")
 		})
@@ -34,9 +34,7 @@ func Router() *gin.Engine {
 		user.POST("/loss", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "controller login")
 		})
-		user.GET("/charge", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
+		user.POST("/charge/:money", controller.UserController{}.Charge)
 	}
 	admin := r.Group("/admin")
 	{

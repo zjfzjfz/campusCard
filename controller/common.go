@@ -23,7 +23,7 @@ func ReturnSuccess(c *gin.Context, code int, msg interface{}, data interface{}) 
 }
 func ReturnError(c *gin.Context, code int, msg interface{}) {
 	json := &JsonErrStruct{Code: code, Msg: msg}
-	c.JSON(200, json)
+	c.JSON(404, json)
 }
 
 func EncryMd5(s string) string {
