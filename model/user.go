@@ -6,7 +6,7 @@ type User struct {
 	Id   string `json:"id"`
 	Pwd  string `json:"password"`
 	Name string `json:"username"`
-	IId  string `json:"cid"`
+	IId  string `json:"iid"`
 }
 
 func (User) TableName() string { return "student_info" }

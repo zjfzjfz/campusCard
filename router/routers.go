@@ -25,15 +25,9 @@ func Router() *gin.Engine {
 		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
 		user.POST("/limit/:id/:limit", controller.UserController{}.PutLimit)
 
-		user.POST("/bath", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
-		user.POST("/library", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
-		user.POST("/loss", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
+		user.POST("/bath", controller.UserController{}.BathRepayment)
+		user.POST("/library", controller.UserController{}.LibraryRepayment)
+		user.POST("/loss/:iid", controller.UserController{}.LossPost)
 		user.POST("/charge/:money", controller.UserController{}.Charge)
 	}
 	admin := r.Group("/admin")

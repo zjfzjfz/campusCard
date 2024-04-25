@@ -149,7 +149,23 @@ func (u UserController) GetDebtInfo(c *gin.Context) {
 		ReturnError(c, 500, err)
 		return
 	}
-	ReturnSuccess(c, 200, "success", debts)
+	ReturnSuccess(c, 200, "挂失请求成功", debts)
+}
+
+func (u UserController) LossPost(c *gin.Context) {
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
+	iid := c.Param("iid")
+	user, err := model.GetUserInfoByUserId(id)
+	if err != nil {
+		ReturnError(c, http.StatusInternalServerError, "error retrieving user information")
+		return
+	}
+	if iid == user.IId {
+		ReturnSuccess(c, 200, "success", iid)
+	} else {
+		ReturnError(c, 404, "error")
+	}
 }
 
 func (u UserController) Charge(c *gin.Context) {
