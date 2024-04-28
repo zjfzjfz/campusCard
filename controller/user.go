@@ -12,7 +12,8 @@ type UserController struct {
 }
 
 func (u UserController) GetCardInfo(c *gin.Context) {
-	id := c.Param("id")
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
 	card, err := model.GetCard(id)
 	if err != nil {
 		// 处理错误，例如记录日志或返回错误响应

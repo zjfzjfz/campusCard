@@ -19,14 +19,14 @@ func Router() *gin.Engine {
 		user.POST("/register", controller.UserController{}.Register)
 		user.POST("/login", controller.UserController{}.Login)
 		user.POST("/logout", controller.UserController{}.Logout)
-		user.GET("/cardinfo/:id", controller.UserController{}.GetCardInfo)
+		user.GET("/cardinfo", controller.UserController{}.GetCardInfo)
 		user.GET("/tradeinfo", controller.UserController{}.GetTradeInfo)
-		user.POST("/trade/:id", controller.UserController{}.Trade)
+		user.POST("/trade", controller.UserController{}.Trade)
 		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
 		user.POST("/limit/:id/:limit", controller.UserController{}.PutLimit)
 
-		user.POST("/bath", controller.UserController{}.BathRepayment)
-		user.POST("/library", controller.UserController{}.LibraryRepayment)
+//		user.POST("/bath", controller.UserController{}.BathRepayment)
+//		user.POST("/library", controller.UserController{}.LibraryRepayment)
 		user.POST("/loss/:iid", controller.UserController{}.LossPost)
 		user.POST("/charge/:money", controller.UserController{}.Charge)
 	}
