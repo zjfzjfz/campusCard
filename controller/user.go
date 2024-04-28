@@ -151,7 +151,7 @@ func (u UserController) GetDebtInfo(c *gin.Context) {
 		ReturnError(c, 500, err)
 		return
 	}
-	ReturnSuccess(c, 200, "挂失请求成功", debts)
+	ReturnSuccess(c, 200, "欠款查询成功", debts)
 }
 
 func (u UserController) LossPost(c *gin.Context) {
