@@ -53,7 +53,8 @@ func (u UserController) Trade(c *gin.Context) {
 }
 
 func (u UserController) PutLimit(c *gin.Context) {
-	id := c.Param("id")
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
 	limit := c.Param("limit")
 	nowLimit, err := model.ChangeLimit(id, limit)
 	if err != nil {
@@ -180,6 +181,33 @@ func (u UserController) Charge(c *gin.Context) {
 	session := sessions.Default(c)
 	id := session.Get("login").(string)
 	err = model.ChangeBalance(money, id)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+
+	ReturnSuccess(c, 200, "success", "")
+}
+
+func (u UserController) BathRepayment(c *gin.Context) {
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
+	err := model.ChangeDebt(id)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+
+	ReturnSuccess(c, 200, "success", "")
+
+}
+
+func (u UserController) LibraryRepayment(c *gin.Context) {
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
+	err := model.ChangeLibrary(id)
 	if err != nil {
 		// 处理错误，例如记录日志或返回错误响应
 		ReturnError(c, 500, err)
