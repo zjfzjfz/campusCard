@@ -57,10 +57,10 @@ func TestTrade(t *testing.T) {
 
 	// 创建一个等待组，用于等待所有并发请求完成
 	var wg sync.WaitGroup
-	wg.Add(1000) // 设置等待组的计数器为 100
+	wg.Add(10000) // 设置等待组的计数器为 100
 
 	// 并发发送 100 个请求
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		go func() {
 			defer wg.Done() // 减少等待组的计数器
 
@@ -69,8 +69,6 @@ func TestTrade(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			// 创建一个 ResponseRecorder 来记录响应
 			rr := httptest.NewRecorder()
-
-//			req.Header.Set("Cookie", "mySession=MTcxNDMxMDQ3OXxOd3dBTkU1QlZWWlFNMVJUU0VsWVMwUk9OamRCTnpRMVdrSkxVVFJaV0ZWTVYwRlNSMHhVV0UxRlJUVkJORmt6U0VjM1YwSTFUVkU9fKDb6sNfRfxx5iAoqwh32a682wMiQcR6jr19dKetzBrq")
 
 			// 处理请求
 			r.ServeHTTP(rr, req)

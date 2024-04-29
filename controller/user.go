@@ -50,10 +50,10 @@ func (u UserController) Trade(c *gin.Context) {
 
 	// 开启 Goroutine 并发处理交易
 	go func() {
-		newBalance, err := model.InsertTransaction(id, transaction)
+		newBalance, err:= model.InsertTransaction(id, transaction)
 		resultChan <- model.TransactionResult{NewBalance: newBalance, Err: err}
 	}()
-	// 等待 Goroutine 完成并处理结果
+	 //等待 Goroutine 完成并处理结果
 	result := <-resultChan
 	if result.Err != nil {
 		// 处理错误，例如记录日志或返回错误响应

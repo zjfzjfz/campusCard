@@ -43,7 +43,8 @@ BEGIN
     -- 获取当前id的balance
     SELECT balance INTO current_balance
     FROM account_info
-    WHERE id = NEW.id;
+    WHERE id = NEW.id
+    FOR UPDATE;
 
     -- 更新balance
     UPDATE account_info

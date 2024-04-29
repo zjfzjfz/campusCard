@@ -68,5 +68,6 @@ func init() {
         panic("连接数据库失败")
     }
 	Db.AutoMigrate(&StudentInfo{}, &AccountInfo{}, &TransactionRecord{}, &DebtRepayment{})
+    Db.DB().SetMaxOpenConns(100)
 
 }
