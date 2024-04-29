@@ -7,6 +7,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type TransactionResult struct {
+	NewBalance interface{}
+	Err        error
+}
+
+
 type Transaction struct {
 	TType     int
 	TLocation string

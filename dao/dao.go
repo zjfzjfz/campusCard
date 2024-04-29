@@ -4,7 +4,7 @@ import (
 	"campusCard/config"
 	//"gorm.io/driver/mysql"
 	//"gorm.io/gorm"
-	_ "github.com/go-sql-driver/mysql"
+	_"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
@@ -68,4 +68,5 @@ func init() {
         panic("连接数据库失败")
     }
 	Db.AutoMigrate(&StudentInfo{}, &AccountInfo{}, &TransactionRecord{}, &DebtRepayment{})
+
 }
