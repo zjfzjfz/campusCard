@@ -17,8 +17,6 @@ type Card struct {
 	Validation string
 }
 
-
-
 func GetCard(id string) (Card, error) {
 	var card Card
 	if err := dao.Db.Table("account_info").
@@ -42,4 +40,46 @@ func ChangeLimit(id string, limit string) (float64, error) {
 		return 0, errors.Wrap(result.Error, "failed to update limit")
 	}
 	return newLimit, nil
+}
+
+func UpdateAccountStatus(id string, status int) error {
+	var accountInfo dao.AccountInfo
+	err := dao.Db.Where("id = ?", id).First(&accountInfo).Error
+	if err != nil {
+		return err
+	}
+	accountInfo.Status = status
+
+	err = dao.Db.Save(&accountInfo).Error
+	return err
+}
+
+func DeleteAndCreateAccount(id string) (interface{}, error) { // 首先获取原始账户信息
+	tx := dao.Db.Begin()
+	var accountInfo dao.AccountInfo
+	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// 删除原始账户
+	if err := tx.Where("id = ?", id).Delete(&accountInfo).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// 创建新的账户，保留原始信息，只修改状态
+	newAccount := dao.AccountInfo{
+		ID:         accountInfo.ID,
+		Status:     2,
+		Balance:    accountInfo.Balance,
+		Validation: accountInfo.Validation,
+		Limit:      accountInfo.Limit,
+	}
+	if err := tx.Create(&newAccount).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return newAccount, nil
 }

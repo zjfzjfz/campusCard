@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"time"
 )
 
 type UserController struct {
@@ -177,8 +178,24 @@ func (u UserController) LossPost(c *gin.Context) {
 		ReturnError(c, 500, err)
 		return
 	}
+
 	if iid == user.IId {
-		ReturnSuccess(c, 200, "挂失请求成功", iid)
+		err := model.UpdateAccountStatus(id, 2)
+		if err != nil {
+			ReturnError(c, 500, err)
+			return
+		}
+
+		// 在60秒内禁止特定交易
+		time.Sleep(60 * time.Second)
+
+		// 删除原账户并创建新账户
+		newAccount, err := model.DeleteAndCreateAccount(id)
+		if err != nil {
+			ReturnError(c, 500, err)
+			return
+		}
+		ReturnSuccess(c, 200, "挂失请求成功", newAccount)
 	} else {
 		ReturnError(c, 404, "身份证号信息不符")
 	}
