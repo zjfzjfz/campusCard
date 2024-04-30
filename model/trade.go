@@ -13,7 +13,6 @@ type TransactionResult struct {
 	Err        error
 }
 
-
 type Transaction struct {
 	TType     int
 	TLocation string
@@ -70,9 +69,9 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 	return newBalance, nil
 }
 
-func ChangeBalance(money float64, id string) error {
+func ChangeBalance(money float64, id string) (interface{}, error) {
 	if money <= 0 {
-		return errors.New("金额必须为正数")
+		return nil, errors.New("金额必须为正数")
 	}
 
 	tx := dao.Db.Begin()
@@ -82,19 +81,9 @@ func ChangeBalance(money float64, id string) error {
 	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
 		// 回滚事务并返回错误
 		tx.Rollback()
-		return err
+		return nil, err
 	}
-
-	// 更新余额
 	newBalance := accountInfo.Balance + money
-
-	// 更新数据库中的余额
-	if err := tx.Model(&accountInfo).Where("id = ?", id).Update("balance", newBalance).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
 	// 创建交易记录
 	record := dao.TransactionRecord{
 		ID:        id,
@@ -109,130 +98,14 @@ func ChangeBalance(money float64, id string) error {
 	result := tx.Create(&record)
 	if result.Error != nil {
 		tx.Rollback()
-		return result.Error
+		return nil, result.Error
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		// 如果提交时发生错误，回滚事务并返回错误
 		tx.Rollback()
-		return err
+		return nil, err
 	}
-	return nil
+	return newBalance, nil
 
-}
-
-func ChangeDebt(id string) error {
-
-	tx := dao.Db.Begin()
-
-	// 检索账户余额
-	var accountInfo dao.AccountInfo
-	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	var debtInfo dao.DebtRepayment
-	if err := tx.Where("id = ?", id).First(&debtInfo).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	// 更新余额
-	newBalance := accountInfo.Balance + debtInfo.BDebt
-	if newBalance < 0 {
-		tx.Rollback()
-		return errors.New("余额不足")
-	}
-
-	// 更新数据库中的余额
-	if err := tx.Model(&accountInfo).Where("id = ?", id).Update("balance", newBalance).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	// 创建交易记录
-	record := dao.TransactionRecord{
-		ID:        id,
-		TType:     3,
-		TLocation: "一卡通",
-		TTime:     time.Now().Format("2006-01-02 15:04:05"),
-		TAmount:   debtInfo.BDebt,
-	}
-
-	// 插入交易记录
-	tx.Table("transaction_records")
-	result := tx.Create(&record)
-	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		// 如果提交时发生错误，回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-	return nil
-}
-
-func ChangeLibrary(id string) error {
-
-	tx := dao.Db.Begin()
-
-	// 检索账户余额
-	var accountInfo dao.AccountInfo
-	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	var debtInfo dao.DebtRepayment
-	if err := tx.Where("id = ?", id).First(&debtInfo).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	// 更新余额
-	newBalance := accountInfo.Balance + debtInfo.LDebt
-	if newBalance < 0 {
-		tx.Rollback()
-		return errors.New("余额不足")
-	}
-
-	// 更新数据库中的余额
-	if err := tx.Model(&accountInfo).Where("id = ?", id).Update("balance", newBalance).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-
-	// 创建交易记录
-	record := dao.TransactionRecord{
-		ID:        id,
-		TType:     3,
-		TLocation: "一卡通",
-		TTime:     time.Now().Format("2006-01-02 15:04:05"),
-		TAmount:   debtInfo.LDebt,
-	}
-
-	// 插入交易记录
-	tx.Table("transaction_records")
-	result := tx.Create(&record)
-	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		// 如果提交时发生错误，回滚事务并返回错误
-		tx.Rollback()
-		return err
-	}
-	return nil
 }

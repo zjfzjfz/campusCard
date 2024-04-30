@@ -20,7 +20,7 @@ CREATE TABLE transaction_records (
     `t_id` VARCHAR(50) PRIMARY KEY,
     `id` VARCHAR(50),
     FOREIGN KEY (id) REFERENCES student_info(id),
-    `t_type` INTEGER CHECK (t_type >= 0 AND t_type <= 2),
+    `t_type` INTEGER CHECK (t_type >= 0 AND t_type <= 3),
     `t_location` VARCHAR(100),
     `t_time` DATETIME,
     `t_amount` NUMERIC

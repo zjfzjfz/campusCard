@@ -7,7 +7,6 @@ import (
 	sessionsRedis "github.com/gin-contrib/sessions/redis"
 
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func Router() *gin.Engine {
@@ -19,29 +18,23 @@ func Router() *gin.Engine {
 		user.POST("/register", controller.UserController{}.Register)
 		user.POST("/login", controller.UserController{}.Login)
 		user.POST("/logout", controller.UserController{}.Logout)
+
 		user.GET("/cardinfo", controller.UserController{}.GetCardInfo)
 		user.GET("/tradeinfo", controller.UserController{}.GetTradeInfo)
-		user.POST("/trade", controller.UserController{}.Trade)
 		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
-		user.POST("/limit/:limit", controller.UserController{}.PutLimit)
 
+		user.PUT("/limit/:limit", controller.UserController{}.PutLimit)
+
+		user.POST("/trade", controller.UserController{}.Trade)
 		user.POST("/bath", controller.UserController{}.BathRepayment)
 		user.POST("/library", controller.UserController{}.LibraryRepayment)
 		user.POST("/loss/:iid", controller.UserController{}.LossPost)
 		user.POST("/charge/:money", controller.UserController{}.Charge)
 	}
+
 	admin := r.Group("/admin")
 	{
-		admin.POST("/login", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
-		admin.GET("/cardinfo", controller.AdminController{}.GetCardInfo)
-		admin.GET("/debtinfo", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller debt")
-		})
-		admin.PUT("/limit/:limit", func(ctx *gin.Context) {
-			ctx.String(http.StatusOK, "controller login")
-		})
+		admin.POST("/login", controller.UserController{}.Login)
 
 	}
 	return r
