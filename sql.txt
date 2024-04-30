@@ -1,11 +1,12 @@
 //建表
+//学生信息，密码是加密过的，必须先注册才能登录
 CREATE TABLE student_info (
     `id` VARCHAR(50) PRIMARY KEY,
     `pwd` VARCHAR(50),
     `name` VARCHAR(100),
     `i_id` VARCHAR(50)
 );
-
+//账户信息中，卡有5种状态（0：正常 1：欠费 2：挂失 3：限额 4：过期）
 CREATE TABLE account_info (
     `cid` VARCHAR(50) PRIMARY KEY,
     `id` VARCHAR(50),
@@ -15,7 +16,7 @@ CREATE TABLE account_info (
     `limit` NUMERIC,
     FOREIGN KEY (id) REFERENCES student_info(id)
 );
-
+//交易记录中，有4种交易类型 0:在线刷卡消费（食堂/教超）；1：第三方充值（充值）；2：水控消费（浴室）3：支付交易（还款）
 CREATE TABLE transaction_records (
     `t_id` VARCHAR(50) PRIMARY KEY,
     `id` VARCHAR(50),
