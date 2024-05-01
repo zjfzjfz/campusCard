@@ -8,7 +8,7 @@ CREATE TABLE student_info (
 );
 //账户信息中，卡有5种状态（0：正常 1：欠费 2：挂失 3：限额 4：过期）
 CREATE TABLE account_info (
-    `cid` VARCHAR(50) PRIMARY KEY,
+    `c_id` VARCHAR(50) PRIMARY KEY,
     `id` VARCHAR(50),
     `status` INTEGER CHECK (status >= 0 AND status <= 4),
     `balance` NUMERIC,

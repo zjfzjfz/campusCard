@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 	_ "time"
 
@@ -36,7 +37,10 @@ func ChangeBath(id string) (interface{}, error) {
 		tx.Rollback()
 		return nil, err
 	}
-
+	if accountInfo.Status != 0 {
+		tx.Rollback()
+		return nil, fmt.Errorf("交易失败：账户处于非正常状态")
+	}
 	var debtInfo dao.DebtRepayment
 	if err := tx.Where("id = ?", id).First(&debtInfo).Error; err != nil {
 		// 回滚事务并返回错误
@@ -91,7 +95,10 @@ func ChangeLibrary(id string) (interface{}, error) {
 		tx.Rollback()
 		return nil, err
 	}
-
+	if accountInfo.Status != 0 {
+		tx.Rollback()
+		return nil, fmt.Errorf("交易失败：账户处于非正常状态")
+	}
 	var debtInfo dao.DebtRepayment
 	if err := tx.Where("id = ?", id).First(&debtInfo).Error; err != nil {
 		// 回滚事务并返回错误

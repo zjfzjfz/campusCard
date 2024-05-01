@@ -1,6 +1,7 @@
 package model
 
 import (
+	"math/rand"
 	"strconv"
 	_ "time"
 
@@ -42,6 +43,15 @@ func ChangeLimit(id string, limit string) (float64, error) {
 	return newLimit, nil
 }
 
+func GetAccountStatus(id string) (int, error) {
+	var accountInfo dao.AccountInfo
+	err := dao.Db.Where("id = ?", id).First(&accountInfo).Error
+	if err != nil {
+		return 0, err
+	}
+	return accountInfo.Status, nil
+}
+
 func UpdateAccountStatus(id string, status int) error {
 	var accountInfo dao.AccountInfo
 	err := dao.Db.Where("id = ?", id).First(&accountInfo).Error
@@ -54,7 +64,7 @@ func UpdateAccountStatus(id string, status int) error {
 	return err
 }
 
-func DeleteAndCreateAccount(id string) (interface{}, error) { // 首先获取原始账户信息
+func CreateAndDeleteAccount(id string) (interface{}, error) { // 首先获取原始账户信息
 	tx := dao.Db.Begin()
 	var accountInfo dao.AccountInfo
 	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
@@ -62,24 +72,34 @@ func DeleteAndCreateAccount(id string) (interface{}, error) { // 首先获取原
 		return nil, err
 	}
 
-	// 删除原始账户
-	if err := tx.Where("id = ?", id).Delete(&accountInfo).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	// 创建新的账户，保留原始信息，只修改状态
 	newAccount := dao.AccountInfo{
+		CID:        strconv.Itoa(rand.Intn(90000000) + 10000000),
 		ID:         accountInfo.ID,
 		Status:     2,
 		Balance:    accountInfo.Balance,
 		Validation: accountInfo.Validation,
 		Limit:      accountInfo.Limit,
 	}
-	if err := tx.Create(&newAccount).Error; err != nil {
+
+	//创建新账户
+	tx.Table("account_info")
+	result := tx.Create(&newAccount)
+	if result.Error != nil {
+		tx.Rollback()
+		return nil, result.Error
+	}
+
+	// 删除原始账户记录
+	result = tx.Where("c_id = ?", accountInfo.CID).Delete(&dao.AccountInfo{})
+	if result.Error != nil {
+		tx.Rollback()
+		return nil, result.Error
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		// 如果提交时发生错误，回滚事务并返回错误
 		tx.Rollback()
 		return nil, err
 	}
-
 	return newAccount, nil
 }

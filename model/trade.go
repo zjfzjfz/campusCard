@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 	_ "time"
 
@@ -40,7 +41,10 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 		tx.Rollback()
 		return nil, err
 	}
-
+	if accountInfo.Status != 0 {
+		tx.Rollback()
+		return nil, fmt.Errorf("交易失败：账户处于非正常状态")
+	}
 	newBalance := accountInfo.Balance + transaction.TAmount
 	if newBalance < 0 {
 		tx.Rollback()
@@ -83,6 +87,11 @@ func ChangeBalance(money float64, id string) (interface{}, error) {
 		tx.Rollback()
 		return nil, err
 	}
+	if accountInfo.Status != 0 {
+		tx.Rollback()
+		return nil, fmt.Errorf("交易失败：账户处于非正常状态")
+	}
+
 	newBalance := accountInfo.Balance + money
 	// 创建交易记录
 	record := dao.TransactionRecord{
