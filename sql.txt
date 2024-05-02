@@ -34,23 +34,36 @@ CREATE TABLE debt_repayment (
     `l_debt` NUMERIC
 );
 
-//触发器
+DROP TRIGGER IF EXISTS update_balance_after_transaction;
 DELIMITER //
 CREATE TRIGGER update_balance_after_transaction
 AFTER INSERT ON transaction_records
 FOR EACH ROW
 BEGIN
     DECLARE current_balance NUMERIC;
+    DECLARE new_balance NUMERIC;
+    
     -- 获取当前id的balance
     SELECT balance INTO current_balance
     FROM account_info
     WHERE id = NEW.id
     FOR UPDATE;
 
-    -- 更新balance
-    UPDATE account_info
-    SET balance = current_balance + NEW.t_amount
-    WHERE id = NEW.id;
+    -- 计算更新后的余额
+    SET new_balance = current_balance + NEW.t_amount;
+    
+    -- 如果更新后的余额小于0，则将status字段改为1
+    IF new_balance < 0 THEN
+        UPDATE account_info
+        SET balance = new_balance,
+            status = 1
+        WHERE id = NEW.id;
+    ELSE
+        -- 否则，正常更新balance
+        UPDATE account_info
+        SET balance = new_balance
+        WHERE id = NEW.id;
+    END IF;
 END;
 //
 DELIMITER ;

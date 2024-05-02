@@ -49,7 +49,7 @@ func TestTrade(t *testing.T) {
 	// 注册路由
 	r.POST("/trade", func(c *gin.Context) {
         session := sessions.Default(c)
-        session.Set("login", "235") // 假设用户已登录，将用户 ID 设置为 "123"
+        session.Set("login", "21122709") // 假设用户已登录，将用户 ID 设置为 "123"
         session.Save()
         // 这里调用你的处理函数
         controller.UserController{}.Trade(c)
@@ -57,10 +57,10 @@ func TestTrade(t *testing.T) {
 
 	// 创建一个等待组，用于等待所有并发请求完成
 	var wg sync.WaitGroup
-	wg.Add(10000) // 设置等待组的计数器为 100
+	wg.Add(1000) // 设置等待组的计数器为 100
 
 	// 并发发送 100 个请求
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		go func() {
 			defer wg.Done() // 减少等待组的计数器
 

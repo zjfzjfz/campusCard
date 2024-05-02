@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"time"
-	_ "time"
 
 	"campusCard/dao"
 	"github.com/pkg/errors"
@@ -31,25 +30,19 @@ func GetTrade(id string) ([]dao.TransactionRecord, error) {
 }
 
 func InsertTransaction(id string, transaction Transaction) (interface{}, error) {
+	// 查询账户余额
+    var accountInfo dao.AccountInfo
+    if err := dao.Db.Where("id = ?", id).First(&accountInfo).Error; err != nil {
+        return nil, err
+    }
+
+    // 验证交易是否有效
+    if err := validTransaction(accountInfo, transaction.TTime, accountInfo.Validation, transaction.TAmount); err != nil {
+        return nil, err
+    }
+	
 	// 开启一个事务
 	tx := dao.Db.Begin()
-
-	// 检索账户余额
-	var accountInfo dao.AccountInfo
-	if err := tx.Where("id = ?", id).First(&accountInfo).Error; err != nil {
-		// 回滚事务并返回错误
-		tx.Rollback()
-		return nil, err
-	}
-	if accountInfo.Status != 0 {
-		tx.Rollback()
-		return nil, fmt.Errorf("交易失败：账户处于非正常状态")
-	}
-	newBalance := accountInfo.Balance + transaction.TAmount
-	if newBalance < 0 {
-		tx.Rollback()
-		return nil, errors.New("余额不足")
-	}
 
 	record := dao.TransactionRecord{
 		ID:        id, // 使用传入的 id
@@ -70,7 +63,32 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 		tx.Rollback()
 		return nil, err
 	}
-	return newBalance, nil
+	return accountInfo.Balance + transaction.TAmount, nil
+}
+
+func validTransaction(accountInfo dao.AccountInfo, transactionTime string, validationTime string, transactionAmount float64) error {
+    // 检查账户状态
+    if accountInfo.Status != 0 {
+        return errors.New("交易失败：账户处于非正常状态")
+    }
+
+    // 如果交易时间大于 Validation 时间，更新 Status 为 4
+    if transactionTime > validationTime {
+        accountInfo.Status = 4
+        if err := dao.Db.Save(&accountInfo).Error; err != nil {
+            return err
+        }
+        return errors.New("已过期")
+    }
+
+    // 计算新余额
+    newBalance := accountInfo.Balance + transactionAmount
+    if newBalance < -10 {
+        return errors.New("余额不足")
+    }
+
+    // 交易有效
+    return nil
 }
 
 func ChangeBalance(money float64, id string) (interface{}, error) {

@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"time"
-	_ "time"
 
 	"campusCard/dao"
 	"github.com/pkg/errors"
