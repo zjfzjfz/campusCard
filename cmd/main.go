@@ -2,7 +2,9 @@ package main
 
 import (
 	"campusCard/dao"
+	"campusCard/cache"
 	"campusCard/router"
+	"campusCard/scheduledTask"
 	"fmt"
 )
 
@@ -16,4 +18,6 @@ func main() {
 	}
 
 	defer dao.Db.Close()
+	defer cache.Rdb.Close()
+	defer scheduledTask.C.Stop()
 }

@@ -3,10 +3,14 @@ package model
 import (
 	"fmt"
 	"time"
-
+	"context"
 	"campusCard/dao"
+	"campusCard/cache"
 	"github.com/pkg/errors"
 )
+
+var ctx = context.Background()
+
 
 type TransactionResult struct {
 	NewBalance interface{}
@@ -36,6 +40,18 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
         return nil, err
     }
 
+
+	// 查询 Redis 中 ID 对应的 Limit
+    limit, err := cache.Rdb.HGet(ctx, "tradeLimit", id).Float64()
+    if err != nil {
+        return nil, err
+    }
+
+	// 比较 Limit 和交易金额
+    if limit + transaction.TAmount < 0 {
+        return nil, errors.New("超过限额")
+    }
+
     // 验证交易是否有效
     if err := validTransaction(accountInfo, transaction.TTime, accountInfo.Validation, transaction.TAmount); err != nil {
         return nil, err
@@ -58,8 +74,16 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 		tx.Rollback()
 		return nil, result.Error
 	}
+	
+	err = cache.Rdb.HSet(ctx, "tradeLimit", id, limit+transaction.TAmount).Err()
+    if err != nil {
+		tx.Rollback()
+        return nil, err
+    }
+	
 	if err := tx.Commit().Error; err != nil {
 		// 如果提交时发生错误，回滚事务并返回错误
+		cache.Rdb.HSet(ctx, "tradeLimit", id, limit)
 		tx.Rollback()
 		return nil, err
 	}
