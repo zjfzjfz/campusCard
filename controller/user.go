@@ -117,13 +117,27 @@ func (u UserController) GetDebtInfo(c *gin.Context) {
 func (u UserController) GetTradeInfo(c *gin.Context) {
 	session := sessions.Default(c)
 	id := session.Get("login").(string)
-	trades, err := model.GetTrade(id)
+	periodParam := c.Param("period")
+	trades, err := model.GetTrade(id, periodParam)
 	if err != nil {
 		// 处理错误，例如记录日志或返回错误响应
 		ReturnError(c, 500, err)
 		return
 	}
 	ReturnSuccess(c, 200, "交易信息查询成功", trades)
+}
+
+// 获取限额
+func (u UserController) GetLimitInfo(c *gin.Context) {
+	session := sessions.Default(c)
+	id := session.Get("login").(string)
+	limit, err := model.GetLimit(id)
+	if err != nil {
+		// 处理错误，例如记录日志或返回错误响应
+		ReturnError(c, 500, err)
+		return
+	}
+	ReturnSuccess(c, 200, "限额查询成功", limit)
 }
 
 // 发起交易

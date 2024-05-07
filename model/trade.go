@@ -1,16 +1,16 @@
 package model
 
 import (
-	"fmt"
-	"time"
-	"context"
-	"campusCard/dao"
 	"campusCard/cache"
+	"campusCard/dao"
+	"context"
+	"fmt"
+	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"time"
 )
 
 var ctx = context.Background()
-
 
 type TransactionResult struct {
 	NewBalance interface{}
@@ -24,39 +24,51 @@ type Transaction struct {
 	TAmount   float64
 }
 
-func GetTrade(id string) ([]dao.TransactionRecord, error) {
+func GetTrade(id string, period string) ([]dao.TransactionRecord, error) {
 	var records []dao.TransactionRecord
-	result := dao.Db.Where("id = ?", id).Find(&records)
+	var result *gorm.DB
+
+	switch period {
+	case "1":
+		result = dao.Db.Where("id = ? AND t_time >= NOW() - INTERVAL 7 DAY", id).Find(&records)
+	case "2":
+		result = dao.Db.Where("id = ? AND t_time >= NOW() - INTERVAL 1 MONTH", id).Find(&records)
+	case "3":
+		result = dao.Db.Where("id = ?", id).Find(&records)
+	default:
+		return records, errors.New("invalid period")
+	}
+
 	if result.Error != nil {
 		return records, errors.Wrap(result.Error, "failed to Get TradeInfo")
 	}
+
 	return records, nil
 }
 
 func InsertTransaction(id string, transaction Transaction) (interface{}, error) {
 	// 查询账户余额
-    var accountInfo dao.AccountInfo
-    if err := dao.Db.Where("id = ?", id).First(&accountInfo).Error; err != nil {
-        return nil, err
-    }
-
+	var accountInfo dao.AccountInfo
+	if err := dao.Db.Where("id = ?", id).First(&accountInfo).Error; err != nil {
+		return nil, err
+	}
 
 	// 查询 Redis 中 ID 对应的 Limit
-    limit, err := cache.Rdb.HGet(ctx, "tradeLimit", id).Float64()
-    if err != nil {
-        return nil, err
-    }
+	limit, err := cache.Rdb.HGet(ctx, "tradeLimit", id).Float64()
+	if err != nil {
+		return nil, err
+	}
 
 	// 比较 Limit 和交易金额
-    if limit + transaction.TAmount < 0 {
-        return nil, errors.New("超过限额")
-    }
+	if limit+transaction.TAmount < 0 {
+		return nil, errors.New("超过限额")
+	}
 
-    // 验证交易是否有效
-    if err := validTransaction(accountInfo, transaction.TTime, accountInfo.Validation, transaction.TAmount); err != nil {
-        return nil, err
-    }
-	
+	// 验证交易是否有效
+	if err := validTransaction(accountInfo, transaction.TTime, accountInfo.Validation, transaction.TAmount); err != nil {
+		return nil, err
+	}
+
 	// 开启一个事务
 	tx := dao.Db.Begin()
 
@@ -74,13 +86,13 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 		tx.Rollback()
 		return nil, result.Error
 	}
-	
+
 	err = cache.Rdb.HSet(ctx, "tradeLimit", id, limit+transaction.TAmount).Err()
-    if err != nil {
+	if err != nil {
 		tx.Rollback()
-        return nil, err
-    }
-	
+		return nil, err
+	}
+
 	if err := tx.Commit().Error; err != nil {
 		// 如果提交时发生错误，回滚事务并返回错误
 		cache.Rdb.HSet(ctx, "tradeLimit", id, limit)
@@ -91,28 +103,28 @@ func InsertTransaction(id string, transaction Transaction) (interface{}, error) 
 }
 
 func validTransaction(accountInfo dao.AccountInfo, transactionTime string, validationTime string, transactionAmount float64) error {
-    // 检查账户状态
-    if accountInfo.Status != 0 {
-        return errors.New("交易失败：账户处于非正常状态")
-    }
+	// 检查账户状态
+	if accountInfo.Status != 0 {
+		return errors.New("交易失败：账户处于非正常状态")
+	}
 
-    // 如果交易时间大于 Validation 时间，更新 Status 为 4
-    if transactionTime > validationTime {
-        accountInfo.Status = 4
-        if err := dao.Db.Save(&accountInfo).Error; err != nil {
-            return err
-        }
-        return errors.New("已过期")
-    }
+	// 如果交易时间大于 Validation 时间，更新 Status 为 4
+	if transactionTime > validationTime {
+		accountInfo.Status = 4
+		if err := dao.Db.Save(&accountInfo).Error; err != nil {
+			return err
+		}
+		return errors.New("已过期")
+	}
 
-    // 计算新余额
-    newBalance := accountInfo.Balance + transactionAmount
-    if newBalance < -10 {
-        return errors.New("余额不足")
-    }
+	// 计算新余额
+	newBalance := accountInfo.Balance + transactionAmount
+	if newBalance < -10 {
+		return errors.New("余额不足")
+	}
 
-    // 交易有效
-    return nil
+	// 交易有效
+	return nil
 }
 
 func ChangeBalance(money float64, id string) (interface{}, error) {

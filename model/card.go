@@ -43,6 +43,15 @@ func ChangeLimit(id string, limit string) (float64, error) {
 	return newLimit, nil
 }
 
+func GetLimit(id string) (float64, error) {
+	var accountInfo dao.AccountInfo
+	err := dao.Db.Where("id = ?", id).First(&accountInfo).Error
+	if err != nil {
+		return 0, err
+	}
+	return accountInfo.Limit, nil
+}
+
 func GetAccountStatus(id string) (int, error) {
 	var accountInfo dao.AccountInfo
 	err := dao.Db.Where("id = ?", id).First(&accountInfo).Error
