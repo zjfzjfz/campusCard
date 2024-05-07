@@ -23,6 +23,7 @@ func Router() *gin.Engine {
 		user.GET("/tradeinfo", controller.UserController{}.GetTradeInfo)
 		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
 
+		user.GET("/limit", controller.UserController{}.PutLimit)
 		user.PUT("/limit/:limit", controller.UserController{}.PutLimit)
 
 		user.POST("/trade", controller.UserController{}.Trade)
