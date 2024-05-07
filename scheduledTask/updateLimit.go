@@ -20,8 +20,8 @@ var (
 func init() {
 	updateLimit(dao.Db, cache.Rdb)
     C = cron.New()
-	//_, err := C.AddFunc("*/1 * * * *", func() {
-    _, err := C.AddFunc("0 0 * * *", func() {
+	_, err := C.AddFunc("*/1 * * * *", func() {
+    //_, err := C.AddFunc("0 0 * * *", func() {
         // 在这里定义定时执行的任务
         updateLimit(dao.Db, cache.Rdb)
         //fmt.Println("执行定时任务...")

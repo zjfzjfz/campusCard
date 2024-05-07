@@ -24,7 +24,6 @@ func Router() *gin.Engine {
 		user.GET("/debtinfo", controller.UserController{}.GetDebtInfo)
 		user.GET("/limitinfo", controller.UserController{}.GetLimitInfo)
 
-		user.GET("/limit", controller.UserController{}.PutLimit)
 		user.PUT("/limit/:limit", controller.UserController{}.PutLimit)
 
 		user.POST("/trade", controller.UserController{}.Trade)
