@@ -2,6 +2,7 @@ package controller
 
 import (
 	"campusCard/model"
+	"campusCard/logger"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"strconv"
@@ -49,6 +50,7 @@ type UserApi struct {
 
 func (u UserController) Login(c *gin.Context) {
 	id := c.DefaultPostForm("id", "")
+	logger.Log.Info(id,"login")
 	password := c.DefaultPostForm("password", "")
 	if id == "" || password == "" {
 		ReturnError(c, 405, "请输入正确的信息")

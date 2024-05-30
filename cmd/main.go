@@ -4,6 +4,7 @@ import (
 	"campusCard/dao"
 	"campusCard/cache"
 	"campusCard/router"
+	"campusCard/logger"
 	"campusCard/scheduledTask"
 	"fmt"
 )
@@ -17,6 +18,7 @@ func main() {
 		return
 	}
 
+	defer logger.FileClose()
 	defer dao.Db.Close()
 	defer cache.Rdb.Close()
 	defer scheduledTask.C.Stop()

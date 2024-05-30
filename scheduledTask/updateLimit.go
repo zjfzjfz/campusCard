@@ -24,8 +24,8 @@ func init() {
     //_, err := C.AddFunc("0 0 * * *", func() {
         // 在这里定义定时执行的任务
         updateLimit(dao.Db, cache.Rdb)
-        //fmt.Println("执行定时任务...")
-        //printHashFromRedis(cache.Rdb, "tradeLimit")
+        fmt.Println("执行定时任务...")
+        printHashFromRedis(cache.Rdb, "tradeLimit")
     })
 	if err != nil {
         fmt.Println("添加定时任务出错：", err)
@@ -62,10 +62,10 @@ func updateLimit(db *gorm.DB, rdb *redis.Client) error {
 }
 
 // 从Redis中打印指定哈希表的内容
-/*func printHashFromRedis(rdb *redis.Client, hashName string) {
+func printHashFromRedis(rdb *redis.Client, hashName string) {
     result := rdb.HGetAll(ctx, hashName).Val()
     fmt.Printf("Hash table %s:\n", hashName)
     for field, value := range result {
         fmt.Printf("%s: %s\n", field, value)
     }
-}*/
+}

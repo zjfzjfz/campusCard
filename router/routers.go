@@ -38,5 +38,15 @@ func Router() *gin.Engine {
 		admin.POST("/login", controller.UserController{}.Login)
 
 	}
+
+	library := r.Group("/library")
+	{
+		library.POST("/reserve", controller.LibraryController{}.ReserveSeat)
+		library.POST("/quick_reserve", controller.LibraryController{}.QuickReserveSeat)
+		library.POST("/scan_reserve", controller.LibraryController{}.ScanReserveSeat)
+		library.POST("/check_in", controller.LibraryController{}.CheckIn)
+		library.POST("/temporary_leave", controller.LibraryController{}.TemporaryLeave)
+		library.POST("/check_out", controller.LibraryController{}.CheckOut)
+	}
 	return r
 }
